@@ -12,6 +12,15 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 
 Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
 
+## Features
+
+- Add pets and manage multiple animals
+- Create and assign tasks to each pet
+- View a daily schedule of all tasks
+- Sort tasks by time
+- Filter tasks by completion status or pet
+- Detect scheduling conflicts between tasks
+
 ## What you will build
 
 Your final app should:
