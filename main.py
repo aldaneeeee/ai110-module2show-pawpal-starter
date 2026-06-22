@@ -1,54 +1,59 @@
-from pawpal_system import Owner, Pet, Task, Scheduler
+"""CLI demo for PawPal+ showing the enhanced scheduling, advanced algorithms,
+formatted output, and JSON persistence added across Challenges 1–4."""
+
+from pawpal_system import Owner, Pet, Task, Scheduler, Priority
 
 # Create owner
 owner = Owner("Karla")
 
 # Create pets
-dog = Pet("Dog")
-cat = Pet("Cat")
+dog = Pet("Dog", "dog")
+cat = Pet("Cat", "cat")
 
 # Add pets to owner
 owner.add_pet(dog)
 owner.add_pet(cat)
 
-# Add tasks out of order to test sorting
-task1 = Task("Walk dog", "10:00")
-task2 = Task("Feed dog", "08:00")
-task3 = Task("Feed cat", "09:00")
+# Add tasks out of order, now with categories + priorities
+dog.add_task(Task("Walk dog", "10:00", category="walk", priority=Priority.LOW))
+dog.add_task(Task("Feed dog", "08:00", category="feeding", priority=Priority.MEDIUM))
+cat.add_task(Task("Feed cat", "09:00", category="feeding", priority=Priority.MEDIUM))
 
-dog.add_task(task1)
-dog.add_task(task2)
-cat.add_task(task3)
+# Add conflicting + high-priority tasks
+dog.add_task(Task("Vet visit", "11:00", category="vet", priority=Priority.HIGH))
+cat.add_task(Task("Medicine", "11:00", category="medication", priority=Priority.HIGH))
 
-# Add conflicting tasks for conflict detection
-dog.add_task(Task("Vet visit", "11:00"))
-cat.add_task(Task("Medicine", "11:00"))
-
-# Create scheduler
 scheduler = Scheduler(owner)
 
-# 1. Sorted schedule
-print("Sorted Schedule:")
+# 1. Plain time-sorted schedule
+print("=== Sorted by Time ===")
 for task in scheduler.sort_by_time():
     print(task)
 
-# 2. Filter by pet name
-print("\nDog Tasks Only:")
-for task in scheduler.filter_tasks(pet_name="Dog"):
+# 2. Challenge 3: priority-based scheduling (High → Low, then time)
+print("\n=== Sorted by Priority (then time) ===")
+for task in scheduler.sort_by_priority():
     print(task)
 
-# 3. Filter completed tasks
-task2.mark_complete()
+# 3. Challenge 4: structured table output (emojis + color-coded status)
+scheduler.print_schedule_table()
 
-print("\nCompleted Tasks:")
-for task in scheduler.filter_tasks(completed=True):
-    print(task)
+# 4. Challenge 1: advanced algorithms
+print("=== Weighted Priority Ranking (most important first) ===")
+for task in scheduler.get_priority_ranking():
+    print(f"  {scheduler.weighted_priority_score(task):>4}  {task.title}")
 
-print("\nPending Tasks:")
-for task in scheduler.filter_tasks(completed=False):
-    print(task)
+print("\nNext available 30-min slot after 08:00:",
+      scheduler.find_next_available_slot("08:00"))
 
-# 4. Conflict detection
-print("\nConflicts:")
+# 5. Conflict detection
+print("\n=== Conflicts ===")
 for warning in scheduler.detect_conflicts():
     print(warning)
+
+# 6. Challenge 2: persistence round-trip
+saved_path = scheduler.save_to_json("data.json")
+print(f"\nSaved schedule to {saved_path}")
+
+reloaded = Scheduler.load_from_json("data.json")
+print(f"Reloaded {len(reloaded.get_all_tasks())} tasks for owner '{reloaded.owner.name}'.")
